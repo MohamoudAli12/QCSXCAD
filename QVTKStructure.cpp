@@ -102,6 +102,10 @@ QVTKStructure::QVTKStructure()
 	iResolution=32;
 	AllowUpdate=true;
 
+	//default to a white background, SetBackgroundColor() below applies it
+	m_BackgroundColor[0]=m_BackgroundColor[1]=m_BackgroundColor[2]=1.0;
+	m_ForegroundColor[0]=m_ForegroundColor[1]=m_ForegroundColor[2]=0.0;
+
 #if VTK_MAJOR_VERSION>=9
 	VTKWidget = new QVTKOpenGLStereoWidget();
 	VTKWidget->setRenderWindow(vtkGenericOpenGLRenderWindow::New());
@@ -160,19 +164,30 @@ void QVTKStructure::AddAxes()
 
 void QVTKStructure::SetBackgroundColor(int r, int g, int b)
 {
-	double rgb[3]={(double)r/255.0,(double)g/255.0,(double)b/255.0};
-	double irgb[3]={1-rgb[0],1-rgb[1],1-rgb[2]};
-	ren->SetBackground(rgb);
+	m_BackgroundColor[0]=(double)r/255.0;
+	m_BackgroundColor[1]=(double)g/255.0;
+	m_BackgroundColor[2]=(double)b/255.0;
+	for (int i=0;i<3;++i)
+		m_ForegroundColor[i]=1-m_BackgroundColor[i];
 
-	Axes->GetXAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(irgb);
-	Axes->GetYAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(irgb);
-	Axes->GetZAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(irgb);
+	ren->SetBackground(m_BackgroundColor);
+
+	Axes->GetXAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(m_ForegroundColor);
+	Axes->GetYAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(m_ForegroundColor);
+	Axes->GetZAxisCaptionActor2D()->GetCaptionTextProperty()->SetColor(m_ForegroundColor);
 
 	for (int i=0;i<3;++i)
 	{
-		if (ActorGridPlane[i]!=NULL) ActorGridPlane[i]->GetProperty()->SetColor(irgb);
+		if (ActorGridPlane[i]!=NULL) ActorGridPlane[i]->GetProperty()->SetColor(m_ForegroundColor);
 	}
 	GetRenderWindow()->GetInteractor()->Render();
+}
+
+void QVTKStructure::GetBackgroundColor(int &r, int &g, int &b) const
+{
+	r=(int)(m_BackgroundColor[0]*255.0+0.5);
+	g=(int)(m_BackgroundColor[1]*255.0+0.5);
+	b=(int)(m_BackgroundColor[2]*255.0+0.5);
 }
 
 void QVTKStructure::SetGeometry(ContinuousStructure *CS)
@@ -418,7 +433,7 @@ void QVTKStructure::RenderGridDir(int dir, unsigned int plane_pos)
 
 	gridMapper->SetInputConnection(plane->GetOutputPort());
 	ActorGridPlane[dir]->SetMapper(gridMapper);
-	ActorGridPlane[dir]->GetProperty()->SetColor(0,0,0);
+	ActorGridPlane[dir]->GetProperty()->SetColor(m_ForegroundColor);
 	ActorGridPlane[dir]->GetProperty()->SetDiffuse(0);
 	ActorGridPlane[dir]->GetProperty()->SetAmbient(1);
 	ActorGridPlane[dir]->GetProperty()->SetRepresentationToWireframe();

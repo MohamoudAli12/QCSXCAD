@@ -83,7 +83,6 @@ void QCSTreeWidget::AddPropItem(CSProperties* prop)
 	str+=QString::fromUtf8(prop->GetName().c_str());
 		
 	QTreeWidgetItem* newItem = new QTreeWidgetItem(this,QStringList(str),0);
-	newItem->setFont(0,QFont("Arial",10));
 	if (prop->GetVisibility()) newItem->setIcon(1,QIcon(":/images/bulb.png"));
 	else newItem->setIcon(1,QIcon(":/images/bulb_off.png"));
 }

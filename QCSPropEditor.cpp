@@ -55,12 +55,14 @@ QColorPushButton::~QColorPushButton()
 
 void QColorPushButton::SetColor(RGBa c)
 {
-	QPalette palette;
+	//start from the inherited palette, only the button colors are ours
+	QPalette palette = this->palette();
 
 	Color=QColor(c.R,c.G,c.B,c.a);
 
-	palette.setColor(QPalette::Button,QColor(c.R,c.G,c.B));
-	if (c.R+c.G+c.B>(128*3)) palette.setColor(QPalette::ButtonText,QColor(0,0,0));
+	QColor opaque(c.R,c.G,c.B);
+	palette.setColor(QPalette::Button,opaque);
+	if (opaque.lightness()>127) palette.setColor(QPalette::ButtonText,QColor(0,0,0));
 	else palette.setColor(QPalette::ButtonText,QColor(255,255,255));
 	setPalette(palette);
 }
@@ -80,14 +82,12 @@ void QColorPushButton::ChangeColor()
 	QColor newColor=QColorDialog::getColor(Color,this);
 	if (newColor.isValid())
 	{
-		int alpha=Color.alpha();
-		Color=newColor;
-		Color.setAlpha(alpha);
-		QPalette palette;
-		palette.setColor(QPalette::Button,newColor);
-		if (Color.red()+Color.blue()+Color.green()>(128*3)) palette.setColor(QPalette::ButtonText,QColor(0,0,0));
-		else palette.setColor(QPalette::ButtonText,QColor(255,255,255));
-		setPalette(palette);
+		RGBa c;
+		c.R=newColor.red();
+		c.G=newColor.green();
+		c.B=newColor.blue();
+		c.a=Color.alpha();
+		SetColor(c);
 	}
 }
 

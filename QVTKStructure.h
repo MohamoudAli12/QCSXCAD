@@ -54,7 +54,8 @@ public:
 	void SetGeometry(ContinuousStructure *CS);
 	void clear();
 
-	void SetBackgroundColor(int r, int g, int b);
+	//! Get the current background color of the 3D view
+	void GetBackgroundColor(int &r, int &g, int &b) const;
 
 	//! Set the update mode to false if this widget should not be rendered e.g. because it is hidden
 	void SetUpdateMode(bool mode) {AllowUpdate=mode;}
@@ -63,6 +64,7 @@ public:
 	void SetCallback(vtkRenderWindowInteractor *iren);
 
 public slots:
+	void SetBackgroundColor(int r, int g, int b);
 	void SetGridOpacity(int val);
 	void ResetView();
 	void setXY();
@@ -125,6 +127,11 @@ protected:
 	vtkStructuredGrid *m_Struct_Grid;
 	vtkActor* ActorGridPlane[3];
 	int GridOpacity; //remember the grid opacity
+
+	//remember the background color and the contrast color derived from it,
+	//grid planes and axes captions are drawn using the latter
+	double m_BackgroundColor[3];
+	double m_ForegroundColor[3];
 
 	int iResolution;
 
